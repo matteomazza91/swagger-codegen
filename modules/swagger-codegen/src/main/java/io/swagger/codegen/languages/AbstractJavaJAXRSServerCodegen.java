@@ -182,6 +182,9 @@ public abstract class AbstractJavaJAXRSServerCodegen extends AbstractJavaCodegen
                         if ( "0".equals(resp.code) ) {
                             resp.code = "200";
                         }
+                        
+                        // set WebApplicationException as vendorExtension for response code different from 200
+                        setWebApplicationException(resp);
 
                         if (resp.baseType == null) {
                             resp.dataType = "void";
@@ -215,7 +218,102 @@ public abstract class AbstractJavaJAXRSServerCodegen extends AbstractJavaCodegen
         return objs;
     }
 
-    @Override
+    
+    /**
+     * set WebApplicationException as vendorExtension for response code different from 200
+     * @param resp
+     */
+    private void setWebApplicationException(CodegenResponse resp) {
+    	if(resp.code != null){
+    		Map<String,Object> webAppException;
+            switch(resp.code){
+            	case "400": 
+            		webAppException = new HashMap<>();
+            		webAppException.put("className", "javax.ws.rs.BadRequestException");
+            		webAppException.put("classSimpleName", "BadRequestException");
+            		webAppException.put("isChildClass", true);
+            		
+            		resp.vendorExtensions.put("x-jaxrs-WebApplicationException", webAppException);
+            		break;
+            	case "401":
+            		webAppException = new HashMap<>();
+            		webAppException.put("className", "javax.ws.rs.NotAuthorizedException");
+            		webAppException.put("classSimpleName", "NotAuthorizedException");
+            		webAppException.put("isChildClass", true);
+            		
+            		resp.vendorExtensions.put("x-jaxrs-WebApplicationException", webAppException);
+            		break;
+            	case "403":
+            		webAppException = new HashMap<>();
+            		webAppException.put("className", "javax.ws.rs.ForbiddenException");
+            		webAppException.put("classSimpleName", "ForbiddenException");
+            		webAppException.put("isChildClass", true);
+            		
+            		resp.vendorExtensions.put("x-jaxrs-WebApplicationException", webAppException);
+            		break;
+            	case "404":
+            		webAppException = new HashMap<>();
+            		webAppException.put("className", "javax.ws.rs.NotFoundException");
+            		webAppException.put("classSimpleName", "NotFoundException");
+            		webAppException.put("isChildClass", true);
+            		
+            		resp.vendorExtensions.put("x-jaxrs-WebApplicationException", webAppException);
+            		break;
+            	case "405":
+            		webAppException = new HashMap<>();
+            		webAppException.put("className", "javax.ws.rs.NotAllowedException");
+            		webAppException.put("classSimpleName", "NotAllowedException");
+            		webAppException.put("isChildClass", true);
+            		
+            		resp.vendorExtensions.put("x-jaxrs-WebApplicationException", webAppException);
+            		break;
+            	case "406":
+            		webAppException = new HashMap<>();
+            		webAppException.put("className", "javax.ws.rs.NotAcceptableException");
+            		webAppException.put("classSimpleName", "NotAcceptableException");
+            		webAppException.put("isChildClass", true);
+            		
+            		resp.vendorExtensions.put("x-jaxrs-WebApplicationException", webAppException);
+            		break;
+            	case "415":
+            		webAppException = new HashMap<>();
+            		webAppException.put("className", "javax.ws.rs.NotSupportedException");
+            		webAppException.put("classSimpleName", "NotSupportedException");
+            		webAppException.put("isChildClass", true);
+            		
+            		resp.vendorExtensions.put("x-jaxrs-WebApplicationException", webAppException);
+            		break;
+            	case "500":
+            		webAppException = new HashMap<>();
+            		webAppException.put("className", "javax.ws.rs.InternalServerErrorException");
+            		webAppException.put("classSimpleName", "InternalServerErrorException");
+            		webAppException.put("isChildClass", true);
+            		
+            		resp.vendorExtensions.put("x-jaxrs-WebApplicationException", webAppException);
+            		break;
+            	case "503":
+            		webAppException = new HashMap<>();
+            		webAppException.put("className", "javax.ws.rs.ServiceUnavailableException");
+            		webAppException.put("classSimpleName", "ServiceUnavailableException");
+            		webAppException.put("isChildClass", true);
+            		
+            		resp.vendorExtensions.put("x-jaxrs-WebApplicationException", webAppException);
+            		break;
+            	default:
+            		if(resp.code.compareTo("3") >= 0){//this response should throw a jaxrs exception that is not present in the switch
+                		webAppException = new HashMap<>();
+                		webAppException.put("className", "javax.ws.rs.WebApplicationException");
+                		webAppException.put("classSimpleName", "WebApplicationException");
+
+                		resp.vendorExtensions.put("x-jaxrs-WebApplicationException", webAppException);	
+            		}
+            }
+        }
+		
+	}
+
+
+	@Override
     public String toApiName(final String name) {
         String computed = name;
         if ( computed.length() == 0 ) {
